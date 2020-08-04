@@ -6,5 +6,7 @@ export class NumerosCreateDto{
     n1:number;
     @IsNumber()
     n2:number;
+
+   
    
 }

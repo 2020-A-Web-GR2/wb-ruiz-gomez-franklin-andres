@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');//Importar cosas en JS
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  console.log('Esperando por el puerto 3000');
+  console.log('Esperando por el puerto 3001');
   //todas las configuraciones extras estan aqui arriba;
   app.use(cookieParser('Me gusta las poliburguers'))
   await app.listen(3001);
