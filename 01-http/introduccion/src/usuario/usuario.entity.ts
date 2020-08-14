@@ -1,12 +1,13 @@
 // usuario.entity.ts
-import {Column, Entity, PrimaryGeneratedColumn, Index} from 'typeorm';
+import {Column, Entity, PrimaryGeneratedColumn, Index, OneToMany} from 'typeorm';
+import { MascotaEntity } from 'src/Mascota/mascota.entity';
 @Index([
     'nombre',
     'apellido',
     'cedula',
     'fechaNacimiento', //nombre de las propiedades en la clase.
 ])
-//INDEX COMPUESTO
+/*//INDEX COMPUESTO
 @Index(
     [
     'nombre',
@@ -15,7 +16,7 @@ import {Column, Entity, PrimaryGeneratedColumn, Index} from 'typeorm';
     'fechaNacimiento', //nombre de las propiedades en la clase.
      ],
     {unique:true}   
-)
+)/*/
 @Entity('epn_usuario') // nombre tabla usuario
 export class UsuarioEntity{
     @PrimaryGeneratedColumn({
@@ -73,6 +74,12 @@ export class UsuarioEntity{
 
     })
     fechaHoraNacimiento?:string;
+    @OneToMany(
+        type => MascotaEntity, // que entidad nos relacionamos
+        mascota=>mascota.usuario
+
+    )
+    mascotas:MascotaEntity[];
 
 
 

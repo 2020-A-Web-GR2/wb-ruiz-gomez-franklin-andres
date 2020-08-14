@@ -165,7 +165,7 @@ export class HttpJuegoController{
 
 
 //Deber 24/jul/2020
-
+//EXAMEN
 //SUMAR (n1 + n2)
 //GET
 //200
@@ -177,24 +177,30 @@ export class HttpJuegoController{
 
    async sumar(
         @Query()  n1,
-        @Param() parametrosRuta
+        @Param() parametrosRuta,
+        @Req() req,
+        @Res() res,
     ){
           //promesas
         const  numerosValida = new NumerosCreateDto();
         numerosValida.n1 = Number(n1.n1);
         numerosValida.n2 = Number(parametrosRuta.n2) ;
+        var total;
         try{
             const errores: ValidationError[] = await validate(numerosValida)
-            if(errores.length>0){
-                console.error('error',errores);
-                throw new BadRequestException('Error validando');
+            console.log('usuario',req.signedCookies.nombreDeUsuario)
+            if(errores.length>0 ||!req.signedCookies.nombreDeUsuario ){
+            //    console.error('error',errores);
+                throw new BadRequestException('Error de validación esta seguro de que ingreso un usuario?');
             }else{
-                return numerosValida.n1 +numerosValida.n2 
+                total = (numerosValida.n1 +numerosValida.n2);
+                this.validacionPuntaje(req,res,total,'El resultado de su suma es:');
+                
             }
         }catch(e){
-            console.log('Error',e)
+            //console.log('Error',e)
         
-            throw new BadRequestException('Error Validando');
+            throw new BadRequestException('Error Validando, Ingrese Usuario ');
         }
        
     }
@@ -209,22 +215,28 @@ export class HttpJuegoController{
     @HttpCode(201)
 
    async resta(
-        @Body() parametrosDeCuerpo
+        @Body() parametrosDeCuerpo,
+        @Req() req,
+        @Res() res,
     ){
           //promesas
         const  numerosValida = new NumerosCreateDto();
         numerosValida.n1 = Number(parametrosDeCuerpo.n1);
-        numerosValida.n2 = Number(parametrosDeCuerpo.n2) ;
+        numerosValida.n2 = Number(parametrosDeCuerpo.n2);
+        var total;
         try{
             const errores: ValidationError[] = await validate(numerosValida)
-            if(errores.length>0){
-                console.error('error',errores);
+            if(errores.length>0 ||!req.signedCookies.nombreDeUsuario ){
+               // console.error('error',errores);
                 throw new BadRequestException('Error validando');
             }else{
-                return numerosValida.n1 - numerosValida.n2 
+                total = numerosValida.n1 - numerosValida.n2 ;
+                
+                this.validacionPuntaje(req,res,total,'El resultado de  su resta es:');
+                
             }
         }catch(e){
-            console.log('Error',e)
+           // console.log('Error',e)
         
             throw new BadRequestException('Error Validando');
         }
@@ -240,22 +252,25 @@ export class HttpJuegoController{
     @HttpCode(200)
     async multiplicar(
         @Headers() headersP,
-        
+        @Req() req,
+        @Res() res,
     ) {
         
         const  numerosValida = new NumerosCreateDto();
         numerosValida.n1 = Number(headersP.n1);
         numerosValida.n2 = Number(headersP.n2) ;
+        var total;
         try{
             const errores: ValidationError[] = await validate(numerosValida)
-            if(errores.length>0){
+            if(errores.length>0 ||!req.signedCookies.nombreDeUsuario ){
                 console.error('error',errores);
                 throw new BadRequestException('Error validando');
             }else{
-                return numerosValida.n1 * numerosValida.n2 
+                total = numerosValida.n1 * numerosValida.n2 
+                this.validacionPuntaje(req,res,total,'El resultado de  su multiplicación es:');
             }
         }catch(e){
-            console.log('Error',e)
+            //console.log('Error',e)
         
             throw new BadRequestException('Error Validando');
         }
@@ -271,23 +286,27 @@ export class HttpJuegoController{
     @HttpCode(201)
     async dividir(
         @Param() parametrosRuta,
-        @Req() req
+        @Req() req,
+        @Res() res,
     ) {
         console.log(req.cookies.galletaInseguraNombre);
         const  numerosValida = new NumerosCreateDto();
         numerosValida.n1 = Number(parametrosRuta.n1);
-        numerosValida.n2 = Number(parametrosRuta.n2) ;
+        numerosValida.n2 = Number(parametrosRuta.n2);
+        var total;
         try{
+            
             const errores: ValidationError[] = await validate(numerosValida)
-            if(errores.length>0 || numerosValida.n2 === 0 || !(req.cookies.galletaInseguraNombre) ){
-                console.error('error',errores);
+            if(errores.length>0 || numerosValida.n2 === 0 || !(req.signedCookies.nombreDeUsuario) ){
+               // console.error('error',errores);
                 throw new BadRequestException('Error validando');
             }else{
-                return numerosValida.n1 / numerosValida.n2 
+                total = numerosValida.n1 / numerosValida.n2 
+                this.validacionPuntaje(req,res,total,'El resultado de  su división es:');
             }
         }catch(e){
             console.log('Error',e)
-        
+         this.validacionPuntaje(req,res,total,'El resultado de  su multiplicación es:');
             throw new BadRequestException('Error Validando');
         }
     }
@@ -295,19 +314,44 @@ export class HttpJuegoController{
     //GET 
     //(Guardar cookie inseguro y no firmada) nombre del usuario
     //QUERY (nombre)
-    @Get('/calculadora/guardarCookienNombre')
+    @Get('/calculadora/guardarCookieNombre/:usuario')
     guardarCookieNombre(
-        @Query() parametrosConsulta,
+        @Param() parametrosRuta,
         @Req()  req,  // request = PETICION
         @Res()  res //response - RESPUESTA
     ){
-        res.cookie('galletaInseguraNombre',//nombre
-        'Andres'//valor
+        res.cookie('nombreDeUsuario',//nombre
+        parametrosRuta.usuario,{signed:true} //valor
         );
+        res.cookie('puntaje','100',{signed:true});
         //return mensaje; //NO SE PUEDE USAR RETURN CUANDO TENGO UN RES
         res.send({
-            mensaje:'ok'
+            mensaje:'Bienvenido, usuario registrado tiene 100  puntos'
         });
+    }
+    validacionPuntaje(
+        @Req()  req,  // request = PETICION
+        @Res()  res, //response - RESPUESTA
+        total,
+        mensajeOperacion
+    ){
+        req.signedCookies.puntaje = Number(req.signedCookies.puntaje)- Math.abs(total); // 
+
+        console.log('puntajesote',Number(req.signedCookies.puntaje))
+        if(Number(req.signedCookies.puntaje)<=0){
+            res.cookie('puntaje','100',{signed:true});
+            res.send({
+                mensaje: req.signedCookies.nombreDeUsuario +'haz terminado tus puntos,se te han restablecido denuevo' 
+            })
+        } else {
+            res.cookie('puntaje',req.signedCookies.puntaje,{signed:true});
+           
+            res.send({
+                mensaje: mensajeOperacion+'='+total+' Recuerda que dispone de ' + Number(req.signedCookies.puntaje) + ' puntos'
+            })
+        }
+        
+        
     }
        
 

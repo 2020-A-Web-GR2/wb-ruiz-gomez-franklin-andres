@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Delete, HttpCode,Headers, Header, BadRequestException, Param,Query, Body, Req, Res ,Put } from "@nestjs/common";
+import { Controller, Get, Post, Delete, HttpCode,Headers, Header, BadRequestException, Param,Query, Body, Req, Res ,Put, InternalServerErrorException } from "@nestjs/common";
+import { UsuarioService } from "./usuario.service";
 
 @Controller('usuario')
 export class UsuarioController{
+   
+
     public arregloUsuario = [
         {
             id:1,
@@ -20,49 +23,95 @@ export class UsuarioController{
         
     ]
     public contActual = 3;
-    @Get()
-    mostrarTodos(){
-        return this.arregloUsuario;
-    }
+    constructor(//inyeccion de dependencia
+        private readonly _usuarioService: UsuarioService){
+            
+        }
+   
     @Post()
-    crearUno(
+    async crearUno(
         @Body() parametrosCuerpo
     ){
-        const nuevoUsuario={
-            id: this.contActual + 1,
-            nombre:parametrosCuerpo.nombre
+        try{
+            console.log('okay')
+            //validación de DTO
+            const  respuesta  = await this._usuarioService.crearUno(parametrosCuerpo);
+            return respuesta;
+        }catch(e){
+            console.error(e)
+            throw new BadRequestException( {
+                mensaje: 'Error validando datos'
+            } );
         }
-        this.arregloUsuario.push(nuevoUsuario);
-        return nuevoUsuario;
+    }
+    @Get()
+    async mostrarTodos(){
+        try{
+            
+            return await this._usuarioService.buscarTodos();
+
+        }catch(e){
+            console.error(e)
+            throw  new InternalServerErrorException({
+                mensaje:  'Error del servidor'
+            })
+        }
     }
     @Get(':id')
-    verUno(
+    async verUno(
         @Param() parametrosRuta
     ){
-        const indice = this.arregloUsuario.findIndex(
-            (usuario)=>usuario.id=== Number(parametrosRuta.id)
-        )
-        return this.arregloUsuario[indice];
+        try{
+            
+            return await this._usuarioService.buscarUno(Number(parametrosRuta.id));
+
+        }catch(e){
+            console.error(e)
+            throw  new InternalServerErrorException({
+                mensaje:  'Error del servidor'
+            })
+        }
     }
     @Put(':id')
-    editarUno(
+    async editarUno(
         @Param() parametrosRuta,
         @Body() parametrosCuerpo
     ){
-        const indice = this.arregloUsuario.findIndex(
-            (usuario)=>usuario.id=== Number(parametrosRuta.id)
-        )
-        return this.arregloUsuario[indice].nombre = parametrosCuerpo.nombre;
+        const id =Number(parametrosRuta.id);
+        const usuarioEditado= parametrosCuerpo;
+        usuarioEditado.id=id;
+        try{
+           
+            return   await this._usuarioService.editarUno(usuarioEditado);
+        }catch(e){
+            console.error(e);
+            throw new InternalServerErrorException({
+                mensaje:'Error del servidor'
+            })
+        }
+      
+       
     }
+   
+   
     @Delete(':id')
-    eliminarUno(
+    async eliminarUno(
         @Param() parametrosRuta,
     ){
-        const indice = this.arregloUsuario.findIndex(
-            (usuario)=>usuario.id=== Number(parametrosRuta.id)
-        )
-        this.arregloUsuario.splice(indice,1);
-        return this.arregloUsuario[indice];
+        const id =Number(parametrosRuta.id);
+    
+        try{
+           const respuesta = await this._usuarioService.eliminarUno(id);
+
+            return {
+                mensaje: 'Registro con id '+ id +' eliminado'
+            };
+        }catch(e){
+            console.error(e);
+            throw new InternalServerErrorException({
+                mensaje:'Error del servidor'
+            })
+        }
     }
 
     //XML <usuario><nombre>ANDRES</nombre></usuario> //notese la cantidad de caracteres
@@ -82,6 +131,8 @@ export class UsuarioController{
     //ELIMINAR UNO
     //DELETE http://localhost:3001/mascota/1
     
-
+///////////////////////RELACIONES//////////////////
+//Usuario->Mascotas
+//Mascota-> Vacunas
 
 }

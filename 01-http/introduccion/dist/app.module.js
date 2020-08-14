@@ -10,16 +10,21 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const http_juego_module_1 = require("./http/http-juego.module");
 const usuario_module_1 = require("./usuario/usuario.module");
 const typeorm_1 = require("@nestjs/typeorm");
+const usuario_entity_1 = require("./usuario/usuario.entity");
+const vacuna_module_1 = require("./Vacuna/vacuna.module");
+const mascota_module_1 = require("./Mascota/mascota.module");
+const vacuna_entity_1 = require("./Vacuna/vacuna.entity");
+const mascota_entity_1 = require("./Mascota/mascota.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     common_1.Module({
         imports: [
-            http_juego_module_1.HttpJuegoModule,
             usuario_module_1.UsuarioModule,
+            mascota_module_1.MascotaModule,
+            vacuna_module_1.VacunaModule,
             typeorm_1.TypeOrmModule.forRoot({
                 name: 'default',
                 type: 'mysql',
@@ -28,7 +33,11 @@ AppModule = __decorate([
                 username: 'root',
                 password: 'root',
                 database: 'test',
-                entities: [],
+                entities: [
+                    usuario_entity_1.UsuarioEntity,
+                    vacuna_entity_1.VacunaEntity,
+                    mascota_entity_1.MascotaEntity
+                ],
                 synchronize: true,
                 dropSchema: false,
             }),

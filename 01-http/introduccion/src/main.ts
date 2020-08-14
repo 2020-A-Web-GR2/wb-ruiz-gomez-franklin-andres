@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   console.log('Esperando por el puerto 3001');
   //todas las configuraciones extras estan aqui arriba;
-  app.use(cookieParser('Me gusta las poliburguers'))
+  app.use(cookieParser('ANDRES'))
   await app.listen(3001);
 }
 bootstrap();

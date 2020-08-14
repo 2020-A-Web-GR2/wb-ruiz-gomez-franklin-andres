@@ -4,17 +4,25 @@ import { AppService } from './app.service';
 import { HttpJuegoModule } from "./http/http-juego.module";
 import { UsuarioModule } from './usuario/usuario.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsuarioEntity } from './usuario/usuario.entity';
+import { VacunaModule } from './Vacuna/vacuna.module';
+import { MascotaModule } from './Mascota/mascota.module';
+import { VacunaEntity } from './Vacuna/vacuna.entity';
+import { MascotaEntity } from './Mascota/mascota.entity';
 
 
 @Module({
   imports: [
     //aqui otros modulos
-    HttpJuegoModule,
-    UsuarioModule,
+    //HttpJuegoModule,
+        UsuarioModule,
+        MascotaModule,
+        VacunaModule,
     ////////////////////////////////////////////////
     //revisar documentación en https://docs.nestjs.com/techniques/database para otras bases de datos esta en //MYSQL
     /////////
     //Caden de conexion
+ 
     TypeOrmModule.forRoot({
         name: 'default',//nombre conexion))
         type: 'mysql', // musql postgres
@@ -25,10 +33,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         database: 'test', // base de datos
         entities: [
 
-            
+          UsuarioEntity,
+          VacunaEntity,
+          MascotaEntity
         ],
         synchronize: true, // actualiza el esquema de la base de datos
-        dropSchema: false,  //eliminar datos y el esquema de base de datos
+        dropSchema: false,  //eliminar datos y el esquema de base de datos // 
+        //para levantar primera vez true
       }),
   ],
   controllers: [
